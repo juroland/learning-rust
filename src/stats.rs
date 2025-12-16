@@ -1,27 +1,31 @@
 pub fn min<T>(x: &[T]) -> Option<T>
 where
-    T: Ord + Copy,
+    T: PartialOrd + Copy,
 {
     if x.is_empty() {
         return None;
     }
     let mut min_value = x[0];
     for &value in x.iter() {
-        min_value = std::cmp::min(min_value, value);
+        if value < min_value {
+            min_value = value;
+        }
     }
     Some(min_value)
 }
 
 pub fn max<T>(x: &[T]) -> Option<T>
 where
-    T: Ord + Copy,
+    T: PartialOrd + Copy,
 {
     if x.is_empty() {
         return None;
     }
     let mut max_value = x[0];
     for &value in x.iter() {
-        max_value = std::cmp::max(max_value, value);
+        if value > max_value {
+            max_value = value;
+        }
     }
     Some(max_value)
 }
@@ -42,14 +46,17 @@ where
 
 pub fn median<T>(x: &[T]) -> Option<f64>
 where
-    T: Ord + Copy + num_traits::ToPrimitive,
+    T: PartialOrd + Copy + num_traits::ToPrimitive,
 {
     if x.is_empty() {
         return None;
     }
     let sorted_x = {
         let mut v = x.to_vec();
-        v.sort_unstable();
+        v.sort_by(|a, b| {
+            a.partial_cmp(b)
+                .expect("Elements must be comparable for sorting")
+        });
         v
     };
     let len = x.len();
